@@ -24,15 +24,28 @@ details summary{font-weight:700;cursor:pointer;list-style:none;display:flex;just
 .foodrow{padding:9px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;font-size:14px}
 .note{background:#fff4e5;border-radius:11px;padding:11px;font-size:12px;color:#7a4a00;line-height:1.45}.success{background:#eaf7ef;color:#166534}.tabs{display:flex;gap:8px;overflow:auto}.tab{white-space:nowrap;border:1px solid var(--line);background:white;border-radius:99px;padding:8px 12px;font-size:13px}.tab.active{background:var(--navy);color:white;border-color:var(--navy)}
 footer{text-align:center;padding:8px 16px;color:var(--muted);font-size:11px}
+
+.tabnav{display:flex;gap:7px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}.tabnav::-webkit-scrollbar{display:none}.tabnav .tab{flex:0 0 auto;padding:10px 13px;font-weight:650}.tabnav .tab.active{background:var(--navy);color:white;border-color:var(--navy)}
+[data-panel].hidden{display:none!important}
+.calendar-legend{display:flex;flex-wrap:wrap;gap:9px 13px;margin:12px 0;font-size:11px;color:var(--muted)}.calendar-legend span{display:flex;align-items:center;gap:5px}.swatch{display:inline-block;width:10px;height:10px;border-radius:3px}.fat{background:#e7a1a1}.maintenance{background:#8db8dc}.performance{background:#e9c36d}.recovery{background:#9bc8a7}.custom{background:#b8a2d9}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;margin:10px 0}.calendar-head strong{font-size:16px}.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.cal-dow{text-align:center;color:var(--muted);font-size:10px;font-weight:700;padding:5px 0}.cal-day{border:1px solid var(--line);border-radius:9px;min-height:54px;padding:5px 2px;background:white;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;font-size:12px}.cal-day.outside{opacity:.35}.cal-day.selected{outline:2px solid var(--navy);outline-offset:1px}.cal-day.today{font-weight:800}.cal-day .cal-tag{font-size:8px;line-height:1.1;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cal-day.obj-fat{background:#f9e5e5;border-color:#e7a1a1}.cal-day.obj-maintenance{background:#e4f0f9;border-color:#8db8dc}.cal-day.obj-performance{background:#fbf2d9;border-color:#e9c36d}.cal-day.obj-recovery{background:#e7f3e9;border-color:#9bc8a7}.cal-day.obj-custom{background:#f0eafa;border-color:#b8a2d9}.calendar-form{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}.block-item{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line)}.block-dot{width:12px;height:12px;border-radius:4px;flex:0 0 auto}.block-meta{flex:1;min-width:0}.block-meta strong{display:block;font-size:13px}.block-meta small{color:var(--muted);font-size:11px}
+
 @media(min-width:650px){main{grid-template-columns:1fr 1fr;align-items:start}main .wide{grid-column:1/-1}header{padding-left:max(18px,calc((100% - 724px)/2));padding-right:max(18px,calc((100% - 724px)/2))}}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><div><h1>🚴 RideFuel</h1><div class="sub">Cycling nutrition · Train well, fuel well</div></div><button class="secondary" id="backupTop" type="button">Backup</button></div>
+  <div class="brand"><div><h1>🚴 RideFuel</h1><div class="sub">Cycling nutrition · Food, training & calorie planning</div></div><button class="secondary" id="backupTop" type="button">Backup</button></div>
 </header>
 <main>
-<section class="card wide">
+<nav id="tabNav" class="tabnav wide" aria-label="RideFuel sections">
+ <button class="tab active" data-tab="dashboard">Dashboard</button>
+ <button class="tab" data-tab="food">Food log</button>
+ <button class="tab" data-tab="workout">Workout</button>
+ <button class="tab" data-tab="database">Food database</button>
+ <button class="tab" data-tab="calendar">Calendar</button>
+</nav>
+<section class="card wide" data-panel="dashboard">
  <div class="row"><div><label for="logDate">Day</label><input id="logDate" type="date"></div><div style="min-width:130px"><label for="weight">Weight (kg)</label><input id="weight" type="number" min="1" step=".1" value="71.8"></div></div>
  <div style="margin-top:12px"><label>Training day</label><div class="pillrow"><button class="pill active" data-day="Single">Single session</button><button class="pill" data-day="Double">Double session</button><button class="pill" data-day="Rest">Rest day</button></div></div>
  <div class="grid2" style="margin-top:16px">
@@ -52,7 +65,7 @@ footer{text-align:center;padding:8px 16px;color:var(--muted);font-size:11px}
  </div>
 </section>
 
-<section class="card">
+<section class="card" data-panel="food">
  <h2>＋ Log food</h2>
  <div class="formgrid">
   <div class="full"><label for="meal">Meal</label><select id="meal"><option>Breakfast</option><option>Snack 1</option><option>Lunch</option><option>Snack 2</option><option>Dinner</option></select></div>
@@ -64,7 +77,7 @@ footer{text-align:center;padding:8px 16px;color:var(--muted);font-size:11px}
  </div>
 </section>
 
-<section class="card">
+<section class="card" data-panel="workout">
  <h2>⚡ Workout log</h2>
  <div class="formgrid">
   <div class="full"><label for="workoutName">Session / notes (optional)</label><input id="workoutName" placeholder="e.g. commute, threshold, endurance"></div>
@@ -76,49 +89,34 @@ footer{text-align:center;padding:8px 16px;color:var(--muted);font-size:11px}
  <div id="workoutList"></div>
 </section>
 
-<section class="card wide">
+<section class="card wide" data-panel="food">
  <h2>Today's meals</h2><div id="meals"></div>
 </section>
 
-
-<section class="card wide">
- <h2>🧭 Integrated training + nutrition block</h2>
- <p class="small">Plan training and calorie targets together. Planned training energy is added to your existing base allowance, while any additional block deficit is weighted towards easier and rest days to protect quality sessions. Set the deficit to zero if your current base targets already include the restriction you want.</p>
- <div class="formgrid">
-  <div><label for="blockStart">Block start date</label><input id="blockStart" type="date"></div>
-  <div><label for="blockWeeks">Block length</label><select id="blockWeeks"><option value="4">4 weeks</option><option value="6">6 weeks</option><option value="8">8 weeks</option><option value="10">10 weeks</option><option value="12">12 weeks</option></select></div>
-  <div><label for="blockDeficit">Weekly calorie deficit (kcal)</label><input id="blockDeficit" type="number" min="0" max="3500" step="250" value="0"></div>
-  <div><label for="blockFtp">FTP (watts)</label><input id="blockFtp" type="number" min="1" step="1" value="310"></div>
-  <div class="full"><div class="note">Important: your existing single / double / rest calorie targets are retained as the starting baseline. The weekly deficit entered here is an additional reduction from those targets. If those targets already include your intended deficit, leave this at 0 rather than restricting twice.</div><button class="primary" id="saveBlock">Save / update integrated block</button></div>
+<section class="card wide" data-panel="calendar">
+ <div class="row" style="align-items:flex-start"><div><h2>Nutrition calendar</h2><p class="small">Create date ranges with different calorie objectives. Each colour marks a block; selecting a date also opens that day in your logs.</p></div></div>
+ <div class="calendar-legend">
+  <span><i class="swatch fat"></i> Fat loss</span><span><i class="swatch maintenance"></i> Maintenance</span><span><i class="swatch performance"></i> Performance</span><span><i class="swatch recovery"></i> Recovery</span><span><i class="swatch custom"></i> Custom</span>
  </div>
- <div id="blockStatus" class="note" style="margin-top:12px">Set your block dates and weekly deficit, then add your typical training week below.</div>
- <div id="blockSummary" style="margin-top:12px"></div>
- <h3 style="margin-top:18px">Weekly training pattern</h3>
- <p class="small">Set the sessions you expect to complete on each day. Estimated cycling work is added to that day's food allowance. An actual workout log replaces the estimate, preventing double-counting.</p>
- <div id="trainingSchedule"></div>
- <h3 style="margin-top:18px">Progressive interval session</h3>
- <p class="small">Build one repeatable interval workout and choose how it progresses. The generated text uses Intervals.icu's workout-builder syntax.</p>
- <div class="formgrid">
-  <div><label for="intervalDay">Interval day</label><select id="intervalDay"><option value="1">Monday</option><option value="2">Tuesday</option><option value="3" selected>Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option><option value="0">Sunday</option></select></div>
-  <div><label for="intervalProgression">Progression method</label><select id="intervalProgression"><option value="reps">Add repetitions</option><option value="duration">Lengthen work intervals</option><option value="intensity">Increase intensity</option><option value="repeat">Repeat same session</option></select></div>
-  <div><label for="intervalWarm">Warm-up (minutes)</label><input id="intervalWarm" type="number" min="0" value="15"></div>
-  <div><label for="intervalReps">Starting repetitions</label><input id="intervalReps" type="number" min="1" max="20" value="3"></div>
-  <div><label for="intervalWork">Work interval (minutes)</label><input id="intervalWork" type="number" min="1" value="10"></div>
-  <div><label for="intervalRecovery">Recovery (minutes)</label><input id="intervalRecovery" type="number" min="0" value="5"></div>
-  <div><label for="intervalIntensity">Work intensity (% FTP)</label><input id="intervalIntensity" type="number" min="50" max="200" value="88"></div>
-  <div><label for="intervalEasy">Recovery intensity (% FTP)</label><input id="intervalEasy" type="number" min="0" max="100" value="50"></div>
-  <div><label for="intervalCool">Cool-down (minutes)</label><input id="intervalCool" type="number" min="0" value="10"></div>
-  <div><label for="intervalStep">Progression step</label><input id="intervalStep" type="number" min="1" max="20" value="1"></div>
-  <div class="full"><button class="secondary" id="saveInterval">Save interval template</button></div>
+ <div class="calendar-head"><button class="secondary" id="prevMonth" aria-label="Previous month">‹</button><strong id="calendarTitle"></strong><button class="secondary" id="nextMonth" aria-label="Next month">›</button></div>
+ <div class="calendar-grid" id="calendarGrid"></div>
+ <div id="calendarSelected" class="small" style="margin-top:8px"></div>
+ <div class="calendar-form">
+  <h3>Create a calorie block</h3>
+  <div class="formgrid">
+   <div><label for="blockObjective">Objective</label><select id="blockObjective"><option value="fat">Fat loss</option><option value="maintenance">Maintenance</option><option value="performance">Performance</option><option value="recovery">Recovery</option><option value="custom">Custom</option></select></div>
+   <div><label for="blockName">Block name (optional)</label><input id="blockName" placeholder="e.g. November cut"></div>
+   <div><label for="blockStart">Start date</label><input id="blockStart" type="date"></div>
+   <div><label for="blockEnd">End date</label><input id="blockEnd" type="date"></div>
+   <div><label for="blockCalories">Daily base target (kcal)</label><input id="blockCalories" type="number" min="0" step="50" value="2500"></div>
+   <div><label for="blockProtein">Protein target (g, optional)</label><input id="blockProtein" type="number" min="0" step="5" placeholder="Use normal target"></div>
+   <div class="full"><p class="small">This target replaces the normal single/double/rest base target during the block. Logged cycling kJ is still added to the daily allowance, as in the original RideFuel.</p><button class="primary" id="saveBlock">Add calendar block</button></div>
+  </div>
  </div>
- <div id="intervalOutput" style="margin-top:12px"></div>
- <div class="grid2" style="margin-top:10px"><button class="secondary" id="copyInterval">Copy selected workout code</button><button class="secondary" id="copyBlock">Copy all interval workouts</button></div>
- <div class="small" style="margin-top:8px">Review every generated session before adding it to Intervals.icu. Progression is a planning aid, not an automatic assessment of readiness.</div>
- <h3 style="margin-top:18px">Block calendar</h3><div id="blockCalendar"></div>
- <div class="grid2" style="margin-top:12px"><button class="secondary" id="recoveryWeek">Take 1-week maintenance break</button><button class="secondary" id="continueBlock">Continue / restart block</button><button class="secondary" id="stopBlock">Stop block</button></div>
+ <div style="margin-top:16px"><h3>Planned blocks</h3><div id="blockList"></div></div>
 </section>
 
-<section class="card">
+<section class="card" data-panel="dashboard">
  <details id="settingsDetails">
   <summary>Targets & preferences</summary>
   <div style="padding-top:14px;display:grid;gap:11px">
@@ -134,7 +132,7 @@ footer{text-align:center;padding:8px 16px;color:var(--muted);font-size:11px}
  </details>
 </section>
 
-<section class="card">
+<section class="card" data-panel="database">
  <details id="foodDetails">
   <summary>Food database</summary>
   <div style="padding-top:14px;display:grid;gap:10px">
@@ -156,7 +154,7 @@ footer{text-align:center;padding:8px 16px;color:var(--muted);font-size:11px}
  </details>
 </section>
 
-<section class="card">
+<section class="card" data-panel="dashboard">
  <details id="historyDetails">
   <summary>Daily history & backup</summary>
   <div style="padding-top:14px;display:grid;gap:10px">
@@ -176,12 +174,9 @@ const defaultFoods=[
 {name:'Oats, dry',kcal:389,protein:16.9},{name:'Rice, cooked',kcal:130,protein:2.7},{name:'Rice, dry',kcal:365,protein:7.1},{name:'Pasta, cooked',kcal:157,protein:5.8},{name:'Pasta, dry',kcal:371,protein:13},{name:'Potato, boiled',kcal:87,protein:1.9},{name:'Sweet potato, baked',kcal:90,protein:2},{name:'Chicken breast, cooked',kcal:165,protein:31},{name:'Chicken breast, raw',kcal:120,protein:22.5},{name:'Turkey breast, cooked',kcal:135,protein:29},{name:'Egg, whole',kcal:143,protein:12.6},{name:'Tuna, drained',kcal:116,protein:25.5},{name:'Salmon, cooked',kcal:206,protein:22},{name:'Lean beef, cooked',kcal:217,protein:26},{name:'Lentils, cooked',kcal:116,protein:9},{name:'Chickpeas, cooked',kcal:164,protein:8.9},{name:'Quinoa, cooked',kcal:120,protein:4.4},{name:'Bread, wholemeal',kcal:247,protein:13},{name:'Rice cakes, plain',kcal:387,protein:8},{name:'Banana',kcal:89,protein:1.1},{name:'Apple',kcal:52,protein:.3},{name:'Pear',kcal:57,protein:.4},{name:'Carrots, cooked',kcal:35,protein:.8},{name:'Broccoli, cooked',kcal:35,protein:2.4},{name:'Courgette, cooked',kcal:17,protein:1.2},{name:'Spinach, cooked',kcal:23,protein:3},{name:'Green beans, cooked',kcal:35,protein:1.9},{name:'Olive oil',kcal:884,protein:0},{name:'Avocado',kcal:160,protein:2},{name:'Honey',kcal:304,protein:.3},{name:'Golden syrup',kcal:320,protein:0},{name:'Jam',kcal:250,protein:.3},{name:'Pea protein powder',kcal:390,protein:80},{name:'Oat drink, unsweetened',kcal:45,protein:1}
 ];
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-let state={foods:defaultFoods,logs:[],workouts:[],meals:[],dayTypes:{},settings:{weight:71.8,single:2500,double:2800,rest:2200,protein:130},dayType:'Single'};
+let state={foods:defaultFoods,logs:[],workouts:[],meals:[],blocks:[],dayTypes:{},settings:{weight:71.8,single:2500,double:2800,rest:2200,protein:130},dayType:'Single'};
 let mealDraft=[];
-const dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const defaultSchedule=[{type:'Rest',duration:0,intensity:0},{type:'Endurance',duration:60,intensity:60},{type:'Endurance',duration:60,intensity:60},{type:'Intervals',duration:90,intensity:75},{type:'Endurance',duration:60,intensity:60},{type:'Endurance',duration:60,intensity:60},{type:'Endurance',duration:90,intensity:60}];
-const defaultInterval={day:3,progression:'reps',warm:15,reps:3,work:10,recovery:5,intensity:88,easy:50,cool:10,step:1};
-function load(){try{const raw=localStorage.getItem(KEY);if(raw&&!localStorage.getItem('ridefuel-pre-upgrade-backup-v1'))localStorage.setItem('ridefuel-pre-upgrade-backup-v1',raw);const s=JSON.parse(raw||'null');if(s&&typeof s==='object'){state={...state,...s,meals:Array.isArray(s.meals)?s.meals:[],dayTypes:s.dayTypes||{},settings:{...state.settings,...(s.settings||{})}};if(!state.dayTypes[today()])state.dayTypes[today()]=state.dayType||'Single';state.trainingBlock={active:false,start:today(),weeks:4,weeklyDeficit:0,ftp:310,schedule:defaultSchedule,interval:defaultInterval,...(s.trainingBlock||{})};state.trainingBlock.schedule=Array.isArray(state.trainingBlock.schedule)?state.trainingBlock.schedule:defaultSchedule;state.trainingBlock.interval={...defaultInterval,...(state.trainingBlock.interval||{})};}}catch(e){}}
+function load(){try{const raw=localStorage.getItem(KEY);if(raw&&!localStorage.getItem('ridefuel-pre-upgrade-backup-v1'))localStorage.setItem('ridefuel-pre-upgrade-backup-v1',raw);const s=JSON.parse(raw||'null');if(s&&typeof s==='object'){state={...state,...s,meals:Array.isArray(s.meals)?s.meals:[],blocks:Array.isArray(s.blocks)?s.blocks:[],dayTypes:s.dayTypes||{},settings:{...state.settings,...(s.settings||{})}};if(!state.dayTypes[today()])state.dayTypes[today()]=state.dayType||'Single';}}catch(e){}}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){alert('Could not save locally. Please export a backup and check available storage.');}}
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -190,12 +185,9 @@ const dateInput=$('logDate');
 function selectedDate(){return dateInput.value||today()}
 function dayLogs(){return state.logs.filter(x=>x.date===selectedDate())}
 function dayWorkouts(){return state.workouts.filter(x=>x.date===selectedDate())}
-function blockActiveOn(d){const b=state.trainingBlock;if(!b||!b.active||!b.start||!b.weeks)return false;const t=new Date(d+'T12:00:00'),a=new Date(b.start+'T12:00:00'),z=b.endDate?new Date(b.endDate+'T12:00:00'):new Date(a);if(!b.endDate)z.setDate(z.getDate()+Number(b.weeks)*7);const pause=b.breakUntil?new Date(b.breakUntil+'T12:00:00'):null;return t>=a&&t<z&&(!pause||t>=pause)}
-function dayPlan(d){const dt=new Date(d+'T12:00:00').getDay();return state.trainingBlock?.schedule?.[dt]||{type:'Rest',duration:0,intensity:0}}
-function plannedKj(d){if(!blockActiveOn(d))return 0;const actual=state.workouts.filter(x=>x.date===d).reduce((a,x)=>a+(Number(x.kj)||0),0);if(actual>0)return 0;const p=dayPlan(d),ftp=Number(state.trainingBlock.ftp)||310;return Math.max(0,Number(p.duration)||0)*60*ftp*(Number(p.intensity)||0)/100/1000}
-function deficitForDate(d){if(!blockActiveOn(d))return 0;const b=state.trainingBlock,weekStart=new Date(d+'T12:00:00');weekStart.setDate(weekStart.getDate()-((weekStart.getDay()+6)%7));let weights=0,own=0;for(let i=0;i<7;i++){const x=new Date(weekStart);x.setDate(x.getDate()+i);const ds=x.toISOString().slice(0,10);if(!blockActiveOn(ds))continue;const p=dayPlan(ds);const w=p.type==='Intervals'?0.35:(p.type==='Rest'?1.25:(p.type==='Endurance'?0.8:1));weights+=w;if(ds===d)own=w;}let activeDays=0;for(let i=0;i<7;i++){const x=new Date(weekStart);x.setDate(x.getDate()+i);if(blockActiveOn(x.toISOString().slice(0,10)))activeDays++;}return weights?Number(b.weeklyDeficit||0)*(activeDays/7)*own/weights:0}
-function baseTarget(){const d=selectedDate(),type=state.dayType;return (Number(state.settings[type.toLowerCase()])||0)+(blockActiveOn(d)?plannedKj(d)-deficitForDate(d):0)}
-function targetForDate(d){const type=state.dayTypes[d]||'Single';return (Number(state.settings[type.toLowerCase()])||0)+(blockActiveOn(d)?plannedKj(d)-deficitForDate(d):0)}
+function blockForDate(d){return (state.blocks||[]).find(b=>d>=b.start&&d<=b.end)||null}
+function baseTarget(){const block=blockForDate(selectedDate());if(block)return Number(block.kcal)||0;let k=state.dayType.toLowerCase();return Number(state.settings[k])||0}
+function targetForDate(d){const block=blockForDate(d);if(block)return Number(block.kcal)||0;const type=state.dayTypes[d]||'Single';return Number(state.settings[type.toLowerCase()])||0}
 function balanceForDate(d){const kcal=state.logs.filter(x=>x.date===d).reduce((a,x)=>a+(Number(x.kcal)||0),0);const kj=state.workouts.filter(x=>x.date===d).reduce((a,x)=>a+(Number(x.kj)||0),0);return targetForDate(d)+kj-kcal}
 function recordedDatesBefore(d){return [...new Set([...state.logs.map(x=>x.date),...state.workouts.map(x=>x.date)])].filter(x=>x<d).sort()}
 function carryBalance(d){return recordedDatesBefore(d).reduce((a,x)=>a+balanceForDate(x),0)}
@@ -203,7 +195,7 @@ function sums(){const l=dayLogs();return {kcal:l.reduce((s,x)=>s+x.kcal,0),prote
 function renderFoodOptions(){const sel=$('food');const old=sel.value;sel.innerHTML=state.foods.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join('');if(state.foods.some(f=>f.name===old))sel.value=old;const mf=$('mealFood'),mold=mf.value;mf.innerHTML=state.foods.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join('');if(state.foods.some(f=>f.name===mold))mf.value=mold;const sm=$('savedMeal'),sold=sm.value;sm.innerHTML='<option value="">Choose a saved meal</option>'+state.meals.map(m=>`<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('');if(state.meals.some(m=>String(m.id)===sold))sm.value=sold;renderPreview()}
 function renderPreview(){const f=state.foods.find(x=>x.name===$('food').value)||state.foods[0];const q=Math.max(0,Number($('quantity').value)||0);$('previewKcal').textContent=`${fmt(f?f.kcal*q/100:0)} kcal`;$('previewProtein').textContent=`${(f?f.protein*q/100:0).toFixed(1)} g protein`}
 function render(){
- const s=sums(), base=baseTarget(), allowance=base+s.kj, remaining=allowance-s.kcal, pt=Number(state.settings.protein)||0, carry=carryBalance(selectedDate()), overall=carry+remaining;
+ const s=sums(), base=baseTarget(), allowance=base+s.kj, remaining=allowance-s.kcal, pt=(blockForDate(selectedDate())&&Number(blockForDate(selectedDate()).protein)>0?Number(blockForDate(selectedDate()).protein):Number(state.settings.protein)||0), carry=carryBalance(selectedDate()), overall=carry+remaining;
  $('weight').value=state.settings.weight;$('singleTarget').value=state.settings.single;$('doubleTarget').value=state.settings.double;$('restTarget').value=state.settings.rest;$('proteinTargetInput').value=state.settings.protein;
  document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.dayType));
  $('remaining').textContent=fmt(remaining);$('remaining').style.color=remaining<0?'var(--red)':'var(--green)';$('carryBalance').textContent=(carry>0?'+':'')+fmt(carry)+' kcal';$('carryBalance').style.color=carry<0?'var(--red)':'var(--green)';$('overallBalance').textContent=(overall>0?'+':'')+fmt(overall)+' kcal';$('overallBalance').style.color=overall<0?'var(--red)':'var(--green)';$('balanceNote').textContent=`${recordedDatesBefore(selectedDate()).length} previous logged day(s) included. Positive = calories remaining / deficit; negative = over target / surplus.`;$('proteinTotal').textContent=`${Math.round(s.protein)} g`;$('proteinSub').textContent=`of ${pt} g target`;$('eatenLabel').textContent=`${fmt(s.kcal)} kcal eaten`;$('allowanceLabel').textContent=`${fmt(allowance)} kcal allowance`;$('calProgress').style.width=`${Math.min(100,allowance>0?s.kcal/allowance*100:0)}%`;$('kjSummary').textContent=`${fmt(s.kj)} kJ`;$('baseSummary').textContent=fmt(base);
@@ -216,36 +208,29 @@ function render(){
  $('savedMealsList').innerHTML=state.meals.map(m=>{const kcal=m.items.reduce((a,x)=>{const f=state.foods.find(z=>z.name===x.food);return a+(f?f.kcal*x.qty/100:0)},0);const protein=m.items.reduce((a,x)=>{const f=state.foods.find(z=>z.name===x.food);return a+(f?f.protein*x.qty/100:0)},0);return `<div class="foodrow"><span><strong>${esc(m.name)}</strong><br><span class="small">${fmt(kcal)} kcal · ${protein.toFixed(1)} g protein</span></span><button class="iconbtn" data-remove-meal="${esc(m.id)}">Remove</button></div>`}).join('')||'<p class="small">No saved meals yet.</p>';
  const days=[...new Set([...state.logs.map(x=>x.date),...state.workouts.map(x=>x.date)])].sort().reverse().slice(0,14);
  $('history').innerHTML=days.length?days.map(d=>{const l=state.logs.filter(x=>x.date===d),w=state.workouts.filter(x=>x.date===d);return `<div class="foodrow"><span><strong>${d}</strong><br><span class="small">${fmt(l.reduce((s,x)=>s+x.kcal,0))} kcal · ${Math.round(l.reduce((s,x)=>s+x.protein,0))} g protein · ${fmt(w.reduce((s,x)=>s+x.kj,0))} kJ</span></span><button class="secondary" data-open-date="${d}">Open</button></div>`}).join(''):'<p class="small">Your history will appear here as you log food and workouts.</p>';
+ renderCalendar();
 }
-
-function initBlockUI(){
- const b=state.trainingBlock||(state.trainingBlock={active:false,start:today(),weeks:4,weeklyDeficit:0,ftp:310,schedule:defaultSchedule.map(x=>({...x})),interval:{...defaultInterval}});
- $('blockStart').value=b.start||today();$('blockWeeks').value=String(b.weeks||4);$('blockDeficit').value=b.weeklyDeficit??1500;$('blockFtp').value=b.ftp||310;
- $('intervalDay').value=b.interval.day;$('intervalProgression').value=b.interval.progression;
- for(const [id,k] of [['intervalWarm','warm'],['intervalReps','reps'],['intervalWork','work'],['intervalRecovery','recovery'],['intervalIntensity','intensity'],['intervalEasy','easy'],['intervalCool','cool'],['intervalStep','step']])$(id).value=b.interval[k];
- renderBlock();
+let calendarMonth=new Date();
+function localDate(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+function objectiveLabel(key){return ({fat:'Fat loss',maintenance:'Maintenance',performance:'Performance',recovery:'Recovery',custom:'Custom'})[key]||'Custom'}
+function renderCalendar(){
+ const y=calendarMonth.getFullYear(),m=calendarMonth.getMonth();
+ $('calendarTitle').textContent=calendarMonth.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+ const first=new Date(y,m,1),offset=first.getDay(),days=new Date(y,m+1,0).getDate(),prevDays=new Date(y,m,0).getDate();
+ const cells=[];['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(x=>cells.push(`<div class="cal-dow">${x}</div>`));
+ for(let i=0;i<42;i++){
+  let date, outside=false;
+  if(i<offset){date=localDate(y,m-1,prevDays-offset+i+1);outside=true}
+  else if(i>=offset+days){date=localDate(y,m+1,i-offset-days+1);outside=true}
+  else date=localDate(y,m,i-offset+1);
+  const block=blockForDate(date),day=Number(date.slice(-2)),classes=['cal-day',outside?'outside':'',date===selectedDate()?'selected':'',date===today()?'today':'',block?`obj-${block.objective}`:''].filter(Boolean).join(' ');
+  cells.push(`<button type="button" class="${classes}" data-cal-date="${date}"><span>${day}</span>${block?`<span class="cal-tag">${esc(block.name||objectiveLabel(block.objective))}</span>`:''}</button>`);
+ }
+ $('calendarGrid').innerHTML=cells.join('');
+ const b=blockForDate(selectedDate());$('calendarSelected').textContent=b?`${selectedDate()} · ${b.name||objectiveLabel(b.objective)} · ${fmt(b.kcal)} kcal base target${b.protein?` · ${fmt(b.protein)} g protein`:''}`:`Selected: ${selectedDate()} · Normal daily target applies.`;
+ $('blockList').innerHTML=(state.blocks||[]).slice().sort((a,b)=>a.start.localeCompare(b.start)).map(b=>`<div class="block-item"><i class="block-dot ${esc(b.objective)}" style="background:${({fat:'#e7a1a1',maintenance:'#8db8dc',performance:'#e9c36d',recovery:'#9bc8a7',custom:'#b8a2d9'})[b.objective]||'#b8a2d9'}"></i><div class="block-meta"><strong>${esc(b.name||objectiveLabel(b.objective))} · ${fmt(b.kcal)} kcal/day</strong><small>${b.start} to ${b.end}${b.protein?` · ${fmt(b.protein)} g protein`:''}</small></div><button class="iconbtn" data-remove-block="${esc(b.id)}" aria-label="Remove block">×</button></div>`).join('')||'<p class="small">No calorie blocks planned yet.</p>';
 }
-function renderBlock(){
- const b=state.trainingBlock;if(!b)return;
- $('trainingSchedule').innerHTML=dayNames.map((name,i)=>{const p=b.schedule[i]||{type:'Rest',duration:0,intensity:0};return `<div class="foodrow" style="align-items:center;gap:6px;flex-wrap:wrap"><strong style="width:78px">${name}</strong><select data-sched-type="${i}" style="flex:1;min-width:112px"><option ${p.type==='Rest'?'selected':''}>Rest</option><option ${p.type==='Endurance'?'selected':''}>Endurance</option><option ${p.type==='Tempo'?'selected':''}>Tempo</option><option ${p.type==='Intervals'?'selected':''}>Intervals</option></select><input data-sched-duration="${i}" type="number" min="0" step="15" value="${p.duration||0}" aria-label="${name} duration" style="width:76px"><input data-sched-intensity="${i}" type="number" min="0" max="200" value="${p.intensity||0}" aria-label="${name} intensity percent" style="width:76px"><span class="small">min / %FTP</span></div>`}).join('');
- const a=new Date((b.start||today())+'T12:00:00'),end=new Date(a);end.setDate(end.getDate()+Number(b.weeks||4)*7-1);const now=new Date(today()+'T12:00:00');const day=Math.floor((now-a)/86400000),left=Math.max(0,Math.ceil((end-now)/86400000));const week=Math.max(1,Math.min(Number(b.weeks)||4,Math.floor(Math.max(0,day)/7)+1));
- $('blockStatus').className='note'+(b.active?' success':'');$('blockStatus').textContent=b.active?(b.breakUntil&&now<new Date(b.breakUntil+'T12:00:00')?`Maintenance break · resumes ${new Date(b.breakUntil+'T12:00:00').toLocaleDateString('en-GB')}. Calorie targets revert to your normal settings during the break.`:(now>=end?`Block complete · ${b.weeks} weeks finished. Take a maintenance week, stop, or continue with a new block.`:`Active block · Week ${week} of ${b.weeks} · ${left} days remaining. Targets include planned training work and your weekly deficit allocation.`)):'Block not active. Save the settings to activate the integrated block.';
- $('blockSummary').innerHTML=`<div class="grid2"><div><div class="muted">Block progress</div><strong>${b.active?Math.max(0,Math.min(100,Math.round((day/(Number(b.weeks)*7))*100))):0}%</strong><div class="progress"><span style="width:${b.active?Math.max(0,Math.min(100,day/(Number(b.weeks)*7)*100)):0}%"></span></div></div><div><div class="muted">Weekly deficit target</div><strong>${fmt(b.weeklyDeficit)} kcal</strong><div class="small">≈ ${((Number(b.weeklyDeficit)||0)/7700).toFixed(2)} kg/week theoretical energy equivalent</div></div></div>`;
- renderIntervalOutput();renderCalendar();
-}
-function intervalCode(week){
- const q=state.trainingBlock.interval,progress=q.progression;let reps=Number(q.reps)||1,work=Number(q.work)||1,intensity=Number(q.intensity)||95;
- const recoveryWeek=(week%4===0);
- if(!recoveryWeek){if(progress==='reps')reps+=Math.floor((week-1)/2)*Number(q.step||1);if(progress==='duration')work+=Math.floor((week-1)/2)*Number(q.step||1);if(progress==='intensity')intensity+=Math.floor((week-1)/2)*Number(q.step||1)}
- else {reps=Math.max(1,reps-1);intensity=Math.max(50,intensity-5)}
- const title=`Week ${week} · ${reps} x ${work}m @ ${intensity}%${recoveryWeek?' · recovery week':''}`;
- return `${title}\n\nWarmup\n- ${q.warm}m ramp 50%-70%\n\nMain Set ${reps}x\n- ${work}m ${intensity}%\n- ${q.recovery}m ${q.easy}%\n\nCooldown\n- ${q.cool}m 50%`;
-}
-function renderIntervalOutput(){const b=state.trainingBlock;if(!b)return;const wk=Math.max(1,Math.min(Number(b.weeks)||4,Math.floor(Math.max(0,(new Date(today()+'T12:00:00')-new Date((b.start||today())+'T12:00:00'))/86400000)/7)+1));const code=intervalCode(wk);$('intervalOutput').innerHTML=`<div class="row"><strong>Week ${wk} workout preview</strong><span class="small">Intervals.icu format</span></div><pre id="intervalPreview" style="white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f9;padding:12px;border-radius:12px;font:13px ui-monospace,monospace">${esc(code)}</pre>`}
-function renderCalendar(){const b=state.trainingBlock;if(!b)return;const start=new Date((b.start||today())+'T12:00:00');let html='';for(let w=0;w<Number(b.weeks||4);w++){const d=new Date(start);d.setDate(d.getDate()+w*7);html+=`<div class="meal"><strong>Week ${w+1}</strong><div class="small">${d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} onwards ${w%4===3?'· Recovery week':''}</div><div class="grid2" style="margin-top:8px">${dayNames.slice(1).concat(dayNames[0]).map((name,j)=>{const idx=(j+1)%7,p=b.schedule[idx];return `<div class="small"><strong>${name.slice(0,3)}</strong><br>${p.type==='Rest'?'Rest':`${p.type} · ${p.duration}m · ${p.intensity}%`}</div>`}).join('')}</div></div>`}$('blockCalendar').innerHTML=html}
-function readInterval(){const q={};for(const [id,k] of [['intervalWarm','warm'],['intervalReps','reps'],['intervalWork','work'],['intervalRecovery','recovery'],['intervalIntensity','intensity'],['intervalEasy','easy'],['intervalCool','cool'],['intervalStep','step']])q[k]=Math.max(0,Number($(id).value)||0);q.day=Number($('intervalDay').value);q.progression=$('intervalProgression').value;return q}
-function saveSchedule(){state.trainingBlock.schedule=dayNames.map((_,i)=>({type:$(`[data-sched-type="${i}"]`).value,duration:Math.max(0,Number($(`[data-sched-duration="${i}"]`).value)||0),intensity:Math.max(0,Number($(`[data-sched-intensity="${i}"]`).value)||0)}));}
-
+function setTab(tab){document.querySelectorAll('[data-panel]').forEach(p=>p.classList.toggle('hidden',p.dataset.panel!==tab));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));try{sessionStorage.setItem('ridefuel-tab',tab)}catch(e){} if(tab==='calendar')renderCalendar()}
 function exportBackup(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`ridefuel-backup-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 load();dateInput.value=today();state.dayTypes[today()]=state.dayTypes[today()]||state.dayType||'Single';
 document.querySelectorAll('[data-day]').forEach(b=>b.addEventListener('click',()=>{state.dayType=b.dataset.day;state.dayTypes[selectedDate()]=state.dayType;persist();render()}));
@@ -262,21 +247,18 @@ $('saveFood').addEventListener('click',()=>{const name=$('newFoodName').value.tr
 document.addEventListener('click',e=>{const rd=e.target.closest('[data-remove-draft]');if(rd){mealDraft.splice(Number(rd.dataset.removeDraft),1);render();return}const rm=e.target.closest('[data-remove-meal]');if(rm){if(confirm('Remove this saved meal from the database? Existing food logs will remain.')){state.meals=state.meals.filter(x=>String(x.id)!==rm.dataset.removeMeal);persist();render()}return}const r=e.target.closest('[data-remove-log]');if(r){state.logs=state.logs.filter(x=>String(x.id)!==r.dataset.removeLog);persist();render();return}const w=e.target.closest('[data-remove-work]');if(w){state.workouts=state.workouts.filter(x=>String(x.id)!==w.dataset.removeWork);persist();render();return}const f=e.target.closest('[data-remove-food]');if(f){if(confirm(`Remove ${f.dataset.removeFood} from the food database? Past logs remain.`)){state.foods=state.foods.filter(x=>x.name!==f.dataset.removeFood);persist();render()}return}const d=e.target.closest('[data-open-date]');if(d){dateInput.value=d.dataset.openDate;render()}});
 $('backupTop').addEventListener('click',exportBackup);$('exportData').addEventListener('click',exportBackup);
 $('importButton').addEventListener('click',()=>$('importFile').click());
-$('importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const imported=JSON.parse(await file.text());if(!imported||!Array.isArray(imported.foods)||!Array.isArray(imported.logs)||!Array.isArray(imported.workouts)||!imported.settings)throw Error();if(confirm('Restore this backup? It will replace the data currently stored in this browser.')){state={...imported,meals:Array.isArray(imported.meals)?imported.meals:[],dayTypes:imported.dayTypes||{},settings:{weight:71.8,single:2500,double:2800,rest:2200,protein:130,...(imported.settings||{})}};persist();render();alert('Backup restored.')}}catch(err){alert('That backup file could not be read.')}e.target.value=''});
+$('importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const imported=JSON.parse(await file.text());if(!imported||!Array.isArray(imported.foods)||!Array.isArray(imported.logs)||!Array.isArray(imported.workouts)||!imported.settings)throw Error();if(confirm('Restore this backup? It will replace the data currently stored in this browser.')){state={...imported,meals:Array.isArray(imported.meals)?imported.meals:[],blocks:Array.isArray(imported.blocks)?imported.blocks:[],dayTypes:imported.dayTypes||{},settings:{weight:71.8,single:2500,double:2800,rest:2200,protein:130,...(imported.settings||{})}};persist();render();alert('Backup restored.')}}catch(err){alert('That backup file could not be read.')}e.target.value=''});
 $('clearDay').addEventListener('click',()=>{if(confirm(`Clear all food and workout entries for ${selectedDate()}? This cannot be undone unless you have a backup.`)){state.logs=state.logs.filter(x=>x.date!==selectedDate());state.workouts=state.workouts.filter(x=>x.date!==selectedDate());persist();render()}});
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+$('prevMonth').addEventListener('click',()=>{calendarMonth.setMonth(calendarMonth.getMonth()-1);renderCalendar()});
+$('nextMonth').addEventListener('click',()=>{calendarMonth.setMonth(calendarMonth.getMonth()+1);renderCalendar()});
+$('calendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-cal-date]');if(!b)return;dateInput.value=b.dataset.calDate;state.dayType=state.dayTypes[selectedDate()]||'Single';state.dayTypes[selectedDate()]=state.dayType;persist();render();});
+$('blockObjective').addEventListener('change',()=>{const defaults={fat:2200,maintenance:2500,performance:2800,recovery:2400,custom:2500};$('blockCalories').value=defaults[$('blockObjective').value]||2500});
+$('saveBlock').addEventListener('click',()=>{const start=$('blockStart').value,end=$('blockEnd').value,kcal=Number($('blockCalories').value),protein=$('blockProtein').value===''?null:Number($('blockProtein').value),objective=$('blockObjective').value,name=$('blockName').value.trim();if(!start||!end||end<start||!Number.isFinite(kcal)||kcal<=0||(protein!==null&&protein<0)){alert('Enter a valid date range and calorie target.');return}if((state.blocks||[]).some(b=>start<=b.end&&end>=b.start)){alert('This date range overlaps an existing calorie block. Remove or adjust the existing block first.');return}state.blocks=state.blocks||[];state.blocks.push({id:String(Date.now()),name,objective,start,end,kcal,protein});$('blockName').value='';$('blockProtein').value='';persist();render();alert('Calorie block added to your calendar.')});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-remove-block]');if(b){if(confirm('Remove this calorie block? Your food and workout logs will remain.')){state.blocks=(state.blocks||[]).filter(x=>String(x.id)!==b.dataset.removeBlock);persist();render()}}});
+$('blockStart').value=today();$('blockEnd').value=(()=>{const d=new Date();d.setDate(d.getDate()+27);return localDate(d.getFullYear(),d.getMonth(),d.getDate())})();
+try{const savedTab=sessionStorage.getItem('ridefuel-tab');if(savedTab&&['dashboard','food','workout','database','calendar'].includes(savedTab))setTab(savedTab);else setTab('dashboard')}catch(e){setTab('dashboard')}
 render();
-
-if(!state.trainingBlock)state.trainingBlock={active:false,start:today(),weeks:4,weeklyDeficit:0,ftp:310,schedule:defaultSchedule.map(x=>({...x})),interval:{...defaultInterval}};
-initBlockUI();
-$('saveBlock').addEventListener('click',()=>{saveSchedule();state.trainingBlock.start=$('blockStart').value||today();state.trainingBlock.weeks=Number($('blockWeeks').value)||4;state.trainingBlock.weeklyDeficit=Math.max(0,Math.min(3500,Number($('blockDeficit').value)||0));state.trainingBlock.ftp=Math.max(1,Number($('blockFtp').value)||310);state.trainingBlock.active=true;persist();render();renderBlock();});
-$('saveInterval').addEventListener('click',()=>{state.trainingBlock.interval=readInterval();const q=state.trainingBlock.interval;const mins=q.warm+q.cool+q.reps*(q.work+q.recovery);state.trainingBlock.schedule[q.day]={type:'Intervals',duration:mins,intensity:Math.round((q.work*q.intensity+q.recovery*q.easy)/(q.work+q.recovery||1))};saveSchedule();persist();renderBlock();render()});
-$('trainingSchedule').addEventListener('change',()=>{saveSchedule();persist();renderBlock();render()});
-$('copyInterval').addEventListener('click',()=>{const el=$('intervalPreview');if(el)navigator.clipboard?.writeText(el.textContent).then(()=>alert('Workout code copied.')).catch(()=>alert('Copy was unavailable; select and copy the preview text.'))});
-$('copyBlock').addEventListener('click',()=>{const b=state.trainingBlock;const all=Array.from({length:Number(b.weeks)||4},(_,i)=>intervalCode(i+1)).join('\n\n====================\n\n');navigator.clipboard?.writeText(all).then(()=>alert('All interval workouts copied.')).catch(()=>alert('Copy was unavailable; copy the workouts individually.'))});
-$('recoveryWeek').addEventListener('click',()=>{if(!state.trainingBlock.active)return alert('Start an integrated block first.');if(confirm('Take a 1-week maintenance break? Training and nutrition targets return to your normal settings for 7 days. The block will resume afterwards.')){const until=new Date(today()+'T12:00:00');until.setDate(until.getDate()+7);const oldEnd=state.trainingBlock.endDate?new Date(state.trainingBlock.endDate+'T12:00:00'):new Date(state.trainingBlock.start+'T12:00:00');if(!state.trainingBlock.endDate)oldEnd.setDate(oldEnd.getDate()+Number(state.trainingBlock.weeks)*7);if(new Date(today()+'T12:00:00')>=oldEnd){state.trainingBlock.start=until.toISOString().slice(0,10);delete state.trainingBlock.endDate;}else{oldEnd.setDate(oldEnd.getDate()+7);state.trainingBlock.endDate=oldEnd.toISOString().slice(0,10);}state.trainingBlock.breakUntil=until.toISOString().slice(0,10);persist();render();renderBlock();alert('Maintenance break scheduled for 7 days. The block will resume automatically afterwards.')}});
-$('continueBlock').addEventListener('click',()=>{if(confirm('Start a fresh block from today using the current duration, weekly deficit and training pattern?')){state.trainingBlock.start=today();state.trainingBlock.active=true;delete state.trainingBlock.breakUntil;delete state.trainingBlock.endDate;persist();render();renderBlock();}});
-$('stopBlock').addEventListener('click',()=>{if(confirm('Stop the current integrated block? Your food, workout history and block settings will be retained.')){state.trainingBlock.active=false;persist();renderBlock();render()}});
-
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
