@@ -1,0 +1,9 @@
+{
+  "name": "RideFuel",
+  "short_name": "RideFuel",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#17365d",
+  "description": "Cycling nutrition and integrated training block planner"
+}
