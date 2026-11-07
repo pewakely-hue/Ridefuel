@@ -1,4 +1,4 @@
-const CACHE = "ridefuel-integrated-v3";
+const CACHE = "ridefuel-calendar-v1";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
