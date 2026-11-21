@@ -36,8 +36,16 @@ footer{text-align:center;padding:8px 16px;color:var(--muted);font-size:11px}
 .scan-modal[hidden]{display:none!important}
 .scan-dialog{width:min(100%,520px);background:white;border-radius:18px;padding:16px;max-height:92vh;overflow:auto}
 .scan-video-wrap{background:#111;border-radius:14px;overflow:hidden;margin:12px 0;min-height:210px;display:flex;align-items:center;justify-content:center}
-.scan-video-wrap video{width:100%;max-height:48vh;object-fit:cover}
+.scan-video-wrap video{width:100%;max-height:48vh;min-height:240px;object-fit:contain;background:#000}
 .scan-status{font-size:13px;color:var(--muted);line-height:1.45}
+.scan-controls{display:grid;gap:10px;margin:10px 0 12px;padding:12px;background:#f7f9fc;border:1px solid var(--line);border-radius:13px}
+.scan-zoom-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;font-weight:650}
+.scan-zoom-head output{font-variant-numeric:tabular-nums;color:var(--navy)}
+.scan-controls input[type=range]{padding:0;min-height:28px;accent-color:var(--navy)}
+.scan-controls input[type=range]:disabled{opacity:.4}
+.scan-control-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.scan-control-buttons button:disabled{opacity:.45;cursor:not-allowed}
+.scan-hint{font-size:11px;color:var(--muted);line-height:1.4;margin:0}
 
 @media(min-width:650px){main{grid-template-columns:1fr 1fr;align-items:start}main .wide{grid-column:1/-1}header{padding-left:max(18px,calc((100% - 724px)/2));padding-right:max(18px,calc((100% - 724px)/2))}}
 </style>
@@ -207,6 +215,17 @@ footer{text-align:center;padding:8px 16px;color:var(--muted);font-size:11px}
   <div class="row"><h2 id="barcodeModalTitle">Scan food barcode</h2><button class="iconbtn" id="closeBarcodeModal" type="button" aria-label="Close scanner">✕</button></div>
   <p class="scan-status" id="scannerStatus">Allow camera access, then hold the product barcode steady in the frame.</p>
   <div class="scan-video-wrap"><video id="barcodeVideo" autoplay muted playsinline></video></div>
+  <div class="scan-controls">
+   <div>
+    <div class="scan-zoom-head"><label for="cameraZoom" style="margin:0">Camera zoom</label><output id="cameraZoomValue">1.0×</output></div>
+    <input id="cameraZoom" type="range" min="1" max="3" step="0.1" value="1" disabled>
+   </div>
+   <div class="scan-control-buttons">
+    <button class="secondary" id="toggleTorch" type="button" disabled>Turn on light</button>
+    <button class="secondary" id="refocusCamera" type="button" disabled>Refocus</button>
+   </div>
+   <p class="scan-hint" id="cameraControlHint">Camera controls will be enabled where supported by your iPhone and Safari.</p>
+  </div>
   <button class="secondary" id="stopBarcodeScan" type="button" style="width:100%">Stop camera</button>
   <p class="small" style="margin-top:12px">If the camera is unavailable, close this window and enter the barcode manually in the food form.</p>
  </div>
@@ -333,11 +352,21 @@ $('saveSettings').addEventListener('click',()=>{state.settings={...state.setting
 // Barcode scanning and Open Food Facts product lookup.
 // ZXing is loaded on demand from its published UMD browser bundle.
 let barcodeReader=null, barcodeControls=null, barcodeScriptPromise=null;
+let activeCameraTrack=null, cameraZoomMin=1, cameraZoomMax=1, cameraZoomStep=.1, torchEnabled=false;
 function setBarcodeStatus(message,isError=false){
  const el=$('barcodeLookupStatus'); if(el){el.textContent=message;el.style.color=isError?'var(--red)':'var(--muted)'}
 }
 function setScannerStatus(message,isError=false){
  const el=$('scannerStatus');if(el){el.textContent=message;el.style.color=isError?'var(--red)':'var(--muted)'}
+}
+function resetCameraControls(){
+ activeCameraTrack=null;torchEnabled=false;
+ const zoom=$('cameraZoom'),zoomValue=$('cameraZoomValue'),torch=$('toggleTorch'),focus=$('refocusCamera'),hint=$('cameraControlHint');
+ if(zoom){zoom.value='1';zoom.min='1';zoom.max='3';zoom.step='.1';zoom.disabled=true}
+ if(zoomValue)zoomValue.textContent='1.0×';
+ if(torch){torch.disabled=true;torch.textContent='Turn on light'}
+ if(focus)focus.disabled=true;
+ if(hint)hint.textContent='Camera controls will be enabled where supported by your iPhone and Safari.';
 }
 function closeBarcodeScanner(){
  try{if(barcodeControls&&barcodeControls.stop)barcodeControls.stop()}catch(e){}
@@ -345,6 +374,7 @@ function closeBarcodeScanner(){
  try{if(barcodeReader&&barcodeReader.reset)barcodeReader.reset()}catch(e){}
  const video=$('barcodeVideo');
  if(video&&video.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());video.srcObject=null}
+ resetCameraControls();
  $('barcodeModal').hidden=true;
 }
 function loadZXing(){
@@ -360,9 +390,71 @@ function loadZXing(){
  });
  return barcodeScriptPromise;
 }
+async function applyCameraZoom(value){
+ if(!activeCameraTrack)return;
+ const zoom=Number(value);
+ try{
+  await activeCameraTrack.applyConstraints({advanced:[{zoom}]});
+  $('cameraZoomValue').textContent=zoom.toFixed(1)+'×';
+ }catch(err){
+  setScannerStatus('This camera does not support adjustable optical/digital zoom in Safari. Move the phone closer and keep the barcode centred.',true);
+ }
+}
+async function toggleCameraTorch(){
+ if(!activeCameraTrack)return;
+ try{
+  const next=!torchEnabled;
+  await activeCameraTrack.applyConstraints({advanced:[{torch:next}]});
+  torchEnabled=next;
+  $('toggleTorch').textContent=next?'Turn off light':'Turn on light';
+ }catch(err){
+  setScannerStatus('The camera light is not available through this iPhone browser.',true);
+  $('toggleTorch').disabled=true;
+ }
+}
+async function refocusCamera(){
+ if(!activeCameraTrack)return;
+ try{
+  const caps=activeCameraTrack.getCapabilities?activeCameraTrack.getCapabilities():{};
+  const modes=caps.focusMode||[];
+  if(modes.includes('single-shot')){
+   await activeCameraTrack.applyConstraints({advanced:[{focusMode:'single-shot'}]});
+   if(modes.includes('continuous'))setTimeout(()=>activeCameraTrack&&activeCameraTrack.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{}),500);
+   setScannerStatus('Refocus requested. Hold the barcode steady.');
+  }else if(modes.includes('continuous')){
+   await activeCameraTrack.applyConstraints({advanced:[{focusMode:'continuous'}]});
+   setScannerStatus('Continuous autofocus requested. Hold the barcode steady.');
+  }else{
+   setScannerStatus('Autofocus is controlled automatically by your iPhone camera. Move slightly closer or further away if the barcode looks blurred.');
+  }
+ }catch(err){setScannerStatus('Autofocus is controlled automatically by your iPhone camera.');}
+}
+function configureCameraControls(){
+ const video=$('barcodeVideo');
+ const track=video&&video.srcObject&&video.srcObject.getVideoTracks?video.srcObject.getVideoTracks()[0]:null;
+ if(!track){$('cameraControlHint').textContent='Camera connected, but advanced controls are not exposed by this browser.';return}
+ activeCameraTrack=track;
+ let caps={};try{caps=track.getCapabilities?track.getCapabilities():{}}catch(e){}
+ const zoom=$('cameraZoom'),torch=$('toggleTorch'),focus=$('refocusCamera'),hint=$('cameraControlHint');
+ const current=track.getSettings?track.getSettings().zoom:1;
+ if(caps.zoom&&Number.isFinite(caps.zoom.max)&&caps.zoom.max>caps.zoom.min){
+  cameraZoomMin=caps.zoom.min||1;cameraZoomMax=Math.min(caps.zoom.max,5);cameraZoomStep=caps.zoom.step||.1;
+  zoom.min=String(cameraZoomMin);zoom.max=String(cameraZoomMax);zoom.step=String(cameraZoomStep);zoom.value=String(Math.min(cameraZoomMax,Math.max(cameraZoomMin,current||cameraZoomMin)));zoom.disabled=false;
+  $('cameraZoomValue').textContent=Number(zoom.value).toFixed(1)+'×';
+ }else{
+  zoom.disabled=true;zoom.min='1';zoom.max='1';zoom.value='1';$('cameraZoomValue').textContent='Auto';
+ }
+ if(caps.torch){torch.disabled=false;torchEnabled=false;torch.textContent='Turn on light'}else{torch.disabled=true;torch.textContent='Light unavailable'}
+ const focusModes=caps.focusMode||[];focus.disabled=!(focusModes.includes('continuous')||focusModes.includes('single-shot'));
+ const available=[];if(!zoom.disabled)available.push('zoom');if(!torch.disabled)available.push('light');if(!focus.disabled)available.push('focus');
+ hint.textContent=available.length?'Available camera controls: '+available.join(', ')+'. Autofocus is requested automatically where supported.':'Your iPhone/Safari does not expose zoom, torch or manual focus controls to this web app. The camera still uses its normal autofocus; move closer, keep the barcode centred and use good lighting.';
+ // Ask for continuous autofocus when the browser exposes that capability.
+ if(focusModes.includes('continuous'))track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});
+}
 async function startBarcodeScanner(){
  $('barcodeModal').hidden=false;
- setScannerStatus('Starting camera…');
+ resetCameraControls();
+ setScannerStatus('Starting rear camera…');
  try{
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('Camera access is unavailable. Open RideFuel using its secure HTTPS address in Safari.');
   const ZX=await loadZXing();
@@ -371,7 +463,7 @@ async function startBarcodeScanner(){
   const devices=await ZX.BrowserCodeReader.listVideoInputDevices();
   const rear=devices.find(d=>/back|rear|environment/i.test(d.label));
   const selected=(rear||devices[devices.length-1]||{}).deviceId;
-  setScannerStatus('Camera ready. Hold the barcode steady inside the camera view.');
+  setScannerStatus('Connecting to the rear camera…');
   barcodeControls=await barcodeReader.decodeFromVideoDevice(selected||undefined,video,(result,error,controls)=>{
    if(result){
     const code=result.getText();
@@ -380,10 +472,16 @@ async function startBarcodeScanner(){
     lookupFoodBarcode(code);
    }
   });
+  // The ZXing reader attaches the live MediaStream to the video element.
+  configureCameraControls();
+  setScannerStatus('Rear camera ready. Centre the barcode in the frame. Use zoom or the light if needed.');
  }catch(err){
   setScannerStatus(err&&err.message?err.message:'Could not start the camera. You can enter the barcode manually.',true);
  }
 }
+$('cameraZoom').addEventListener('input',e=>applyCameraZoom(e.target.value));
+$('toggleTorch').addEventListener('click',toggleCameraTorch);
+$('refocusCamera').addEventListener('click',refocusCamera);
 function numberFromNutriments(n,keys){
  for(const key of keys){
   const v=n?n[key]:undefined;
