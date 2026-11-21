@@ -1,4 +1,4 @@
-const CACHE = "ridefuel-quickadd-categories-v2";
+const CACHE = "ridefuel-barcode-v1";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
